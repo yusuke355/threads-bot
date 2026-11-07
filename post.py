@@ -42,8 +42,12 @@ def publish(p):
         children.append(c["id"])
     for c in children:
         wait_ready(c)
-    car = call("POST", "me/threads", media_type="CAROUSEL",
-               children=",".join(children), text=p["caption"])
+    params = dict(media_type="CAROUSEL", children=",".join(children), text=p["caption"])
+    try:
+        car = call("POST", "me/threads", topic_tag="転職", **params)
+    except RuntimeError as e:
+        print("topic_tag なしで再試行:", e)
+        car = call("POST", "me/threads", **params)
     wait_ready(car["id"])
     res = call("POST", "me/threads_publish", creation_id=car["id"])
     return res["id"]
