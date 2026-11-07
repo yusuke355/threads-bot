@@ -1,0 +1,28 @@
+name: Threads 数字の記録
+on:
+  schedule:
+    - cron: "0 15 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: threads-post
+  cancel-in-progress: false
+jobs:
+  insights:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 数字を記録
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+        run: python insights.py
+      - name: 保存
+        run: |
+          git config user.name "threads-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add data
+          git diff --cached --quiet || (git commit -m "insights" && git push)
