@@ -1,0 +1,29 @@
+name: 年収ノート 数字の記録
+on:
+  schedule:
+    - cron: "10 15 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: threads-nenshu
+  cancel-in-progress: false
+jobs:
+  insights:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: 数字を記録
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN_NENSHU }}
+          ACCOUNT_DIR: nenshu
+        run: python insights_tree.py
+      - name: 保存
+        run: |
+          git config user.name "threads-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add nenshu/data
+          git diff --cached --quiet || (git commit -m "nenshu insights" && git pull --rebase && git push)
