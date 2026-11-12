@@ -16,13 +16,18 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: 数字を記録
+      - name: 数字を記録（これまでのカルーセル投稿）
         env:
           THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
         run: python insights.py
+      - name: 数字を記録（テキスト投稿）
+        env:
+          THREADS_ACCESS_TOKEN: ${{ secrets.THREADS_ACCESS_TOKEN }}
+          ACCOUNT_DIR: tenshoku
+        run: python insights_tree.py
       - name: 保存
         run: |
           git config user.name "threads-bot"
           git config user.email "bot@users.noreply.github.com"
-          git add data
+          git add data tenshoku
           git diff --cached --quiet || (git commit -m "insights" && git pull --rebase && git push)
